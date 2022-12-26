@@ -1,0 +1,6 @@
+Version 0.1
+    * New components: hashtable, linkedlist
+      linkedlist is a generic data structure allow user to put any data into it.
+      hashtable only allows int currently, as this is based on the need of leetcode challenge.
+      automake file included into the project to conform with GNU standard.
+      note that the project is MIT licensed.
