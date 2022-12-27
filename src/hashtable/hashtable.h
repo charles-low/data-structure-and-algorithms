@@ -11,7 +11,10 @@ typedef struct _hashtable hashtable;
 
 hashtable *hashtable_new();
 int _hashtable_index(hashtable *table, int hash);
-void hashtable_add(hashtable *table, int key, int value);
+hashitem *_hashtable_get_bucket(hashtable *table, int key);
+hashitem *_hashtable_get_item(hashtable *table, int key);
+int hashtable_set(hashtable *table, int key, int value);
 void hashtable_dispose(hashtable *table);
 int hashtable_buckets_count(hashtable *table);
 void hashtable_print(hashtable *table);
+int hashtable_del(hashtable *table, int key);

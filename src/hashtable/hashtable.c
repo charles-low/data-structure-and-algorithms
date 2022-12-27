@@ -2,7 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#define HASHTABLE_MAX_SIZE = 0X7FFFFFFF;
+#include "hashtable.h"
+
 // ref: https://planetmath.org/goodhashtableprimes
 const int HASH_PRIMES[]={53,97,193,389,769,1543,3079,6151, \
                       12289,24593,49157,98317,196613,393241, \
@@ -35,19 +36,41 @@ int _hashtable_index(hashtable *table, int hash){
     return hash % HASH_PRIMES[table->_prime_idx];
 }
 
-void hashtable_add(hashtable *table, int key, int value){
+hashitem *_hashtable_get_bucket(hashtable *table, int key){
+    int idx = _hashtable_index(table, key);
+    hashitem *bucket = table->_buckets[idx];
+    return bucket;
+}
+
+hashitem *_hashtable_get_item(hashtable *table, int key){
+    hashitem *bucket = _hashtable_get_bucket(table, key);
+    while(bucket){
+        if(bucket->key == key)
+            return bucket;
+        bucket = bucket->next;
+    }
+    return NULL;
+}
+
+
+int hashtable_set(hashtable *table, int key, int value){
     if(table->count > HASH_PRIMES[table->_prime_idx] * 0.75){
         // TODO: rehash
     }
-    int idx = _hashtable_index(table, key);
-    
-    hashitem *new_item = malloc(sizeof(hashitem));
-    new_item->key = key;
-    new_item->value = value;
-    new_item->next = table->_buckets[idx];
-
-    table->_buckets[idx] = new_item;
-    table->count++;
+    hashitem *item = _hashtable_get_item(table, key);
+    if(item){
+        item->value = value;
+        return 0;
+    }else{
+        int idx = _hashtable_index(table, key);
+        hashitem *new_item = malloc(sizeof(hashitem));
+        new_item->key = key;
+        new_item->value = value;
+        new_item->next = table->_buckets[idx];
+        table->_buckets[idx] = new_item;
+        table->count++;
+        return 1;
+    }   
 }
 
 void hashtable_dispose(hashtable *table){
@@ -58,7 +81,7 @@ void hashtable_dispose(hashtable *table){
         hashitem *next;
         while(item){
             next = item->next;
-            free(table->_buckets[i]);
+            free(item);
             item = next;
         }
     }
@@ -83,12 +106,38 @@ void hashtable_print(hashtable *table){
     printf("]");
 }
 
-int main(){
-    hashtable *table = hashtable_new();
-    hashtable_add(table,1,1);
-    hashtable_add(table,2,2);
-    hashtable_print(table);
-    fflush(stdout);
-    hashtable_dispose(table);
+int *hashtable_get(hashtable *table, int key){
+    hashitem *item = _hashtable_get_item(table, key);
+    if(!item)
+        return NULL;
+    return &(item->value);
+}
+
+
+int hashtable_has_key(hashtable *table, int key){
+    hashitem *item = _hashtable_get_item(table, key);
+    return (item != NULL);
+}
+
+int hashtable_del(hashtable *table, int key){
+    if(!hashtable_has_key(table, key))
+        return 0;
+    int idx = _hashtable_index(table, key);
+    hashitem *bucket = table->_buckets[idx];
+    hashitem *prev = NULL;
+    while(bucket){
+        if(bucket->key == key){
+            if(prev){
+                prev->next = bucket->next;
+            }else{
+                table->_buckets[idx] = NULL;
+            }
+            free(bucket);
+            table->count--;
+            return 1;
+        }
+        prev = bucket;
+        bucket = bucket->next;
+    }
     return 0;
 }
