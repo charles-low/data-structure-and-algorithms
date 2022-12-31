@@ -1,8 +1,10 @@
 #include <stdio.h>
-#include "hashtable.c"
+#include "hashtable.h"
+#include "array.h"
 
 int main(){
     hashtable *table = hashtable_new();
+    int *arr;
     hashtable_set(table,1,1);
     hashtable_set(table,54,54);
     hashtable_set(table,2,2);
@@ -20,6 +22,14 @@ int main(){
     hashtable_del(table, 3);
     printf("table has 3: %d\n", hashtable_has_key(table, 3));
     printf("hashtable count: %d\n", table->count);
+
+    arr = hashtable_keys(table);
+
+    printf("before bubble sort\n");
+    print_array(arr, table->count);
+    bubble_sort(arr, table->count);
+    printf("after bubble sort\n"); 
+    print_array(arr, table->count);
 
     fflush(stdout);
     hashtable_dispose(table);

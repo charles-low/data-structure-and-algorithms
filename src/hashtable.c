@@ -12,17 +12,7 @@ const int HASH_PRIMES[]={53,97,193,389,769,1543,3079,6151, \
                       100663319,201326611,402653189,\
                       805306457,1610612741};
 
-typedef struct _hashitem {
-    int key;
-    int value;
-    struct _hashitem *next;
-} hashitem;
 
-typedef struct _hashtable{
-    int count;
-    struct _hashitem **_buckets;
-    int _prime_idx;
-} hashtable;
 
 hashtable *hashtable_new(){
     hashtable *table = malloc(sizeof(*table));  
@@ -141,3 +131,20 @@ int hashtable_del(hashtable *table, int key){
     }
     return 0;
 }
+
+int *hashtable_keys(hashtable *table){
+    int *arr = malloc(sizeof(int) * table->count);
+    int arr_idx=0;
+    hashitem *bucket;
+    for(int i=0; i< hashtable_buckets_count(table); i++){
+        bucket = table->_buckets[i];
+        while(bucket){
+            arr[arr_idx] = bucket->key;
+            arr_idx++;
+            bucket = bucket->next;
+        }
+    }
+    return arr;
+}
+
+
